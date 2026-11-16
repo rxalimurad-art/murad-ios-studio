@@ -192,6 +192,17 @@ async function telemetry() {
   };
 }
 
+// Reads docs/80-provenance.json (written by scripts/provenance.mjs) into the code-origin split.
+async function provenance() {
+  let raw;
+  try { raw = await readFile(join(docsDir, '80-provenance.json'), 'utf8'); } catch { return null; }
+  try {
+    const j = JSON.parse(raw);
+    if (!j || !j.totals || !j.totals.files || !j.totals.loc) return null;
+    return { generated: j.generated || null, files: j.totals.files, loc: j.totals.loc, count: (j.items || []).length };
+  } catch { return null; }
+}
+
 async function state() {
   let files = [];
   try { files = (await readdir(docsDir)).filter((f) => f.endsWith('.md')).sort(); } catch {}
@@ -201,6 +212,7 @@ async function state() {
   const bugs = parseBugs(docs['51-bugs.md']);
   const release = docs['60-release.md'] || '';
   const metrics = await telemetry();
+  const prov = await provenance();
 
   const stages = STAGES.map((s) => {
     let status = s.docs.length && s.docs.every((d) => docs[d]) ? 'done' : s.docs.some((d) => docs[d]) ? 'active' : 'todo';
@@ -227,6 +239,7 @@ async function state() {
     stages,
     gates,
     metrics,
+    provenance: prov,
     board,
     bugs,
     blockers: findBlockers(docs),

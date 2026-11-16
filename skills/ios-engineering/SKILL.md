@@ -19,6 +19,12 @@ see `THIRD_PARTY_NOTICES.md`.
 - Dependencies are opt-out by default: add one only with a one-line justification in the PR or
   it gets removed in review.
 
+## Provenance
+
+- Every source file opens with a provenance tag in its first lines — `// Provenance: ai-generated`,
+  `human-assisted`, `human-written`, or `legacy`. The `code-provenance` skill is the source of truth
+  for the classes, the format, and the `scripts/provenance.mjs` tooling. The reviewer gates on it.
+
 ## Architecture
 
 - State with `@Observable` models (no `ObservableObject`/`@Published`); views read models

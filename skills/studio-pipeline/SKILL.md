@@ -23,7 +23,7 @@ Each stage reads the artifacts of the stages before it and writes exactly its ow
 | 4. Design | `ux-designer`, then `icon-designer` | `10-prd`; the icon also reads `00-vision`, `12-design` | `docs/12-design.md`; `docs/13-icon.md` + `design/icon/` |
 | 5. Architecture | `ios-architect` | `10-prd`, `12-design` | `docs/20-architecture.md` |
 | 6. Board | main agent | `11-backlog` | `docs/30-board.md` |
-| 7. Build | `ios-developer` → `code-reviewer` → `qa-engineer` | board + all docs | code, `docs/51-bugs.md` |
+| 7. Build | `ios-developer` → `code-reviewer` → `qa-engineer` | board + all docs | code, `docs/51-bugs.md`, `docs/80-provenance.md` |
 | 8. Release | `release-manager` | everything | `docs/60-release.md`, store assets |
 
 Docs are plain Markdown in the project's `docs/` folder. They are the team's only shared
@@ -78,6 +78,7 @@ printf '%s\n' "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"event\":\"ticket\",\
 | `verify` | `ios-developer`, after each build/test run | `ticket`, `kind` (`build`/`test`), `result` (`pass`/`fail`) |
 | `review` | `code-reviewer`, with its verdict | `ticket`, `verdict` (`approved`/`changes`) |
 | `qa` | `qa-engineer`, after testing a ticket | `ticket`, `verdict` (`pass`/`fail`), `bugs` (count filed) |
+| `provenance` | whoever sets or changes a file's origin class (see `code-provenance`) | `file`, `class` (`ai-generated`/`human-assisted`/`human-written`/`legacy`), `agent` |
 | `blocker` | anyone who stops the line | `ticket` (if any), `text` |
 | `heal` | whoever runs a recovery (see Self-healing) | `ticket`, `class`, `action`, `outcome` (`recovered`/`failed`/`escalated`) |
 
