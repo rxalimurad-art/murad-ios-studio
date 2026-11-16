@@ -20,7 +20,7 @@ until the verify loop proves it — green build, green tests, screenshot in hand
 - The ticket (from the caller's task description and `docs/30-board.md`).
 - `docs/20-architecture.md`, `docs/12-design.md`, `docs/10-prd.md` — and the acceptance criteria
   of your ticket verbatim.
-- The `studio-pipeline`, `ios-engineering`, and `verify-loop` skills govern how you work.
+- The `studio-pipeline`, `ios-engineering`, `code-provenance`, and `verify-loop` skills govern how you work.
 
 ## Duties
 1. Work on a branch named `feature/APP-NN-short-title` off the latest main.
@@ -34,12 +34,18 @@ until the verify loop proves it — green build, green tests, screenshot in hand
    When a build, test, or run step fails, classify it and follow that class's recovery and
    budget (see Self-healing in the `studio-pipeline` skill); never repeat an unchanged action that already
    failed twice. Report each recovery and its outcome in your handoff.
-6. The `App icon` ticket: replace the asset catalog's `AppIcon.appiconset` with the one in
+6. Tag the provenance of every source file you touch (see the `code-provenance` skill): a file you
+   create gets `// Provenance: ai-generated`; a file someone else authored that you edit becomes
+   `human-assisted`; code you import unchanged is `legacy`. Stamp it with
+   `node scripts/provenance.mjs set <file> <class>`, then run `node scripts/provenance.mjs write` to
+   refresh `docs/80-provenance.md` before you hand off. Never label your own output `human-written`.
+7. The `App icon` ticket: replace the asset catalog's `AppIcon.appiconset` with the one in
    `design/icon/` (never edit the PNGs — icon changes go back to `icon-designer`), make sure the
    target's app-icon setting is `AppIcon`, build with zero asset-catalog warnings, and screenshot
    the simulator home screen showing the icon.
-7. Log a `verify` telemetry event after every build and test run, a `heal` event for every
-   recovery attempt, and a `ticket` event for every status you set (see Telemetry in the `studio-pipeline` skill).
+8. Log a `verify` telemetry event after every build and test run, a `heal` event for every
+   recovery attempt, a `ticket` event for every status you set, and a `provenance` event for every
+   file whose class you set or change (see Telemetry in the `studio-pipeline` skill).
 
 ## Rules
 - Implement exactly the acceptance criteria. Adjacent refactors or "while I'm here" features are

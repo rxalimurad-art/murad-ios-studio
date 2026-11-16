@@ -103,6 +103,8 @@
 <script>
 const STATUSES = ['blocked', 'ready', 'in-progress', 'in-review', 'qa', 'done'];
 const COLORS = { blocked: 'var(--bad)', ready: 'var(--muted)', 'in-progress': 'var(--accent)', 'in-review': 'var(--warn)', qa: '#8e5bd9', done: 'var(--ok)' };
+const PROV_CLASSES = ['ai-generated', 'human-assisted', 'human-written', 'legacy', 'untagged'];
+const PROV_COLORS = { 'ai-generated': 'var(--accent)', 'human-assisted': '#8e5bd9', 'human-written': 'var(--ok)', legacy: 'var(--muted)', untagged: 'var(--warn)' };
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const dur = (sec) => sec == null ? '—' : sec < 60 ? `${Math.round(sec)}s` : sec < 3600 ? `${Math.round(sec / 60)}m` : sec < 86400 ? `${(sec / 3600).toFixed(1)}h` : `${(sec / 86400).toFixed(1)}d`;
 const pct = (x) => x == null ? '—' : `${Math.round(x * 100)}%`;
@@ -224,8 +226,21 @@ function render(s) {
   const activity = !m ? '' : `<section class="panel"><h2>Activity</h2><ul class="plain">${m.recent.slice(0, 10).map((e) =>
     `<li class="ev"><span class="src">${esc(new Date(e.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span>${esc(describe(e))}</li>`).join('')}</ul></section>`;
 
+  const p = s.provenance;
+  let provenance = '';
+  if (p && p.loc) {
+    const totalLoc = PROV_CLASSES.reduce((n, c) => n + (p.loc[c] || 0), 0) || 1;
+    const present = PROV_CLASSES.filter((c) => (p.files[c] || 0) > 0);
+    const bar = present.map((c) => `<span style="width:${(p.loc[c] || 0) / totalLoc * 100}%;background:${PROV_COLORS[c]}" title="${c}: ${p.loc[c] || 0} lines"></span>`).join('');
+    const kpis = present.map((c) => `<div class="kpi"><div class="v" style="color:${PROV_COLORS[c]}">${pct((p.loc[c] || 0) / totalLoc)}</div><div class="l">${c} · ${p.files[c] || 0} file${(p.files[c] || 0) === 1 ? '' : 's'}, ${p.loc[c] || 0} lines</div></div>`).join('');
+    const warn = p.files.untagged ? `<p class="meta" style="color:var(--warn);margin-top:6px">${p.files.untagged} file(s) untagged — run <code>node scripts/provenance.mjs write</code></p>` : '';
+    provenance = `<section class="panel full"><h2>Code provenance <span class="meta" style="font-weight:400">${p.count} files${p.generated ? ` · ${ago(Date.parse(p.generated))}` : ''}</span></h2>
+      <div class="bar">${bar}</div><div class="kpis">${kpis}</div>${warn}</section>`;
+  }
+
   app.innerHTML = `
     ${s.vision?.wedge ? `<section class="panel full"><h2>The wedge</h2><div class="wedge">${md(s.vision.wedge)}</div></section>` : ''}
+    ${provenance}
     <section class="panel full"><h2>Pipeline</h2><div class="pipeline">${pipeline}</div></section>
     ${metrics}
     <section class="panel"><h2>Board</h2>${board}</section>
